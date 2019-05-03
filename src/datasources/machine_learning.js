@@ -15,10 +15,11 @@ class MLAPI extends RESTDataSource {
         patches.map(patch => {
             classes[patch.class] = classes[patch.class] ? classes[patch.class] + 1 : 1;
         });
+        const date = new Date(full_dataset.created);
 
         return {
             id: full_dataset.uuid,
-            created: full_dataset.created,
+            created: `${date.toLocaleDateString('default')} ${date.toLocaleTimeString('default')}`,
             classes: Object.keys(classes).length,
             annotations: patches.length,
             name: full_dataset.name,
