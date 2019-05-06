@@ -7,23 +7,44 @@ const typeDefs = gql`
         models: [Model]!
         benchmarks: [Benchmark]!
     }
-    
+
     type Model {
         id: ID!
-        uploaded: String!
-        status: String!
-        results: [Benchmark]!
-        published: Boolean!
+        name: String!
+        path: String
+        created: String!
     }
-    
+
     type Dataset {
         id: ID!
         created: String!
-        classes: Int!
-        annotations: Int!
+        finished: String!
+        path: String!
+        status: String!
+        type: String!
+        files: [String]!
+        patches: [Patch]!
+        classes_count: Int!
+        annotations_count: Int!
         name: String!
     }
-    
+
+    type Patch {
+        class: Int!,
+        crops: [Crop]!
+        feature: String!
+        image: String!
+        split: String!
+    }
+
+    type Crop {
+        coordinates: [Float]!
+        data_type: Int!
+        path: String!,
+        shape: [Int]!
+        type: String!
+    }
+
     type Benchmark {
         model_id: ID!
         owner: String!

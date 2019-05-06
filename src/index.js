@@ -8,7 +8,7 @@ const server = new ApolloServer({
     typeDefs,
     resolvers,
     dataSources: () => ({
-        MLAPI: new MLAPI(),
+        MLAPI: new MLAPI(process.env.ML_ENDPOINT),
     }),
 });
 
