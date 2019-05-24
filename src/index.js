@@ -14,7 +14,7 @@ const server = new ApolloServer({
         }
     },
     dataSources: () => ({
-        MLAPI: new MLAPI(process.env.ML_ENDPOINT, process.env.GEOIMAGENET_API_URL),
+        MLAPI: new MLAPI(process.env.ML_ENDPOINT, process.env.GEOIMAGENET_API_URL, process.env.MODEL_STORAGE_PATH),
         GINAPI: new GINAPI(process.env.GEOIMAGENET_API_URL),
     }),
 });

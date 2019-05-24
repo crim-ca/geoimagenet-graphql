@@ -1,5 +1,6 @@
 const {AuthDataSource} = require('./AuthDataSource');
 const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
+const fs = require('fs');
 
 function to_readable_date(string) {
     const date = new Date(string);
@@ -7,10 +8,11 @@ function to_readable_date(string) {
 }
 
 class MLAPI extends AuthDataSource {
-    constructor(baseURL, GEOIMAGENET_API_URL) {
+    constructor(baseURL, GEOIMAGENET_API_URL, MODEL_STORAGE_PATH) {
         super();
         this.baseURL = baseURL;
         this.GEOIMAGENET_API_URL = GEOIMAGENET_API_URL;
+        this.MODEL_STORAGE_PATH = MODEL_STORAGE_PATH;
     }
 
     async dataset_reducer(full_dataset) {
@@ -22,18 +24,57 @@ class MLAPI extends AuthDataSource {
         });
 
         return {
+            ...full_dataset,
             id: full_dataset.uuid,
             created: to_readable_date(full_dataset.created),
             finished: to_readable_date(full_dataset.finished),
-            path: full_dataset.path,
-            status: full_dataset.status,
-            type: full_dataset.type,
-            files: full_dataset.files,
             patches: full_dataset.data.patches,
             classes_count: Object.keys(classes).length,
             annotations_count: patches.length,
-            name: full_dataset.name,
         }
+    }
+
+    input_or_output_reducer(input_or_output) {
+        let type;
+        if (input_or_output['types']) {
+            type = input_or_output['types'];
+        } else {
+            type = [input_or_output['type']];
+        }
+        // There doesn't seem to be any type guarantee in what's returned from the api. patching values with plausible replacements
+        return {
+            ...input_or_output,
+            id: input_or_output.id || input_or_output.identifier,
+            abstract: input_or_output.abstract || input_or_output.title,
+            minOccurs: input_or_output.minOccurs || 0,
+            type: type,
+        };
+    }
+
+    async process_reducer(process) {
+        return {
+            ...process,
+            id: process.uuid,
+            inputs: process.inputs.map(input => this.input_or_output_reducer(input)),
+            outputs: process.outputs.map(output => this.input_or_output_reducer(output)),
+        };
+    }
+
+    async get_process(process_id) {
+        const res = await this.get(`processes/${process_id}`);
+        return this.process_reducer(res.data.process);
+    }
+
+    async get_all_processes() {
+        const res = await this.get('processes');
+        const ids = res.data.processes.map(process => process.uuid);
+        const promises = ids.map(id => this.get(`processes/${id}`));
+        const responses = await Promise.all(promises);
+        return responses.map(response => this.process_reducer(response.data.process));
+    }
+
+    async get_all_benchmarks() {
+
     }
 
     async model_reducer(model) {
@@ -73,25 +114,45 @@ class MLAPI extends AuthDataSource {
         return [];
     }
 
+    async store_model({stream, filename}) {
+        const path = `${this.MODEL_STORAGE_PATH}/${filename}`;
+        return new Promise((resolve, reject) => {
+            stream
+                .on('error', error => {
+                    if (stream.truncated) {
+                        fs.unlinkSync(path);
+                    }
+                    reject(error)
+                })
+                .pipe(fs.createWriteStream(path))
+                .on('error', error => reject(error))
+                .on('finish', () => resolve({path}))
+        });
+    }
+
+    async upload_model(model_name, file) {
+        const {stream, filename, mimetype, encoding} = await file;
+        // TODO validate mimetype, encoding, stuff
+        const {path} = await this.store_model({stream, filename});
+        const res = await this.post('models', {
+            model_name: model_name,
+            model_path: path,
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        return this.model_reducer(res.data.model);
+    }
+
     job_reducer(job) {
         return {
+            ...job,
             id: job.uuid,
-            process: job.process,
-            task: job.task,
-            service: job.service,
-            user: job.user,
             inputs: job.inputs.map(input => job_input_reducer(input)),
-            status: job.status,
-            status_message: job.status_message,
-            status_location: job.status_location,
-            execute_async: job.execute_async,
-            is_workflow: job.is_workflow,
-            created: job.created,
-            started: job.started,
-            finished: job.finished,
-            duration: job.duration,
-            progress: job.progress,
-            tags: job.tags
+            created: to_readable_date(job.created),
+            started: to_readable_date(job.started),
+            finished: to_readable_date(job.finished),
         };
     }
 

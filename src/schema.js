@@ -6,61 +6,104 @@ const typeDefs = gql`
         datasets(status: Status): [Dataset]!
         models: [Model]!
         benchmarks: [Benchmark]!
+        processes: [Process!]!
+        process(process_id: ID!): Process
         jobs(process_id: ID!): [Job]!
         job(process_id: ID!, job_id: ID!): Job
     }
-    
+
     type Subscription {
         jobs: [Job]!
     }
-    
+
     type Mutation {
         upload_model(
             model_name: String!,
-            model: String!
+            file: Upload!
         ): ModelUploadResponse!
-        start_batch: BatchCreationResponse!
+        start_batch: JobLaunchResponse!
+        launch_benchmark(model_id: ID!): JobLaunchResponse!
     }
-    
-    type BatchCreationResponse {
+
+    type JobLaunchResponse {
         success: Boolean!
         job: Job
     }
-    
+
     type ApiResponse {
         mlSent: MLSentContent
         mlResponse: MLReceivedContent
         detail: [MLError]
     }
-    
+
     type MLError {
         location: [String]!
         message: String!
         type: String!
     }
-    
+
     type MLReceivedContent {
         bob: String
     }
-    
+
     type MLSentContent {
-        inputs: [Input]
-        outputs: [Output]
+        inputs: [JobInput]
+        outputs: [JobOutput]
     }
-    
+
     type ModelUploadResponse {
         success: Int!
         message: String!
         model: Model
     }
-    
+
+    type Process {
+        id: ID!
+        identifier: String!
+        title: String!
+        abstract: String
+        keywords: [String]!
+        metadata: [ProcessMetaData]!
+        version: String!
+        execute_endpoint: String!
+        user: String!
+        inputs: [ProcessInputOrOutput!]!
+        outputs: [ProcessInputOrOutput!]!
+        limit_single_job: Boolean!
+    }
+
+    type ProcessInputOrOutput {
+        id: String!
+        abstract: String
+        type: [String!]!
+        formats: [ProcessInputOrOutputFormat]!
+        minOccurs: Int!
+        maxOccurs: Int!
+    }
+
+    type ProcessInputOrOutputFormat {
+        mimeType: String!
+        schema: String!
+        encoding: String!
+    }
+
+    type ProcessMetaData {
+        href: String!
+        rel: String!
+        type: String!
+        hreflang: String!
+        title: String!
+        role: String!
+        value: String!
+    }
+
     type Job {
         id: ID!
         process: String!
         task: String!
         service: String
         user: String
-        inputs: [Input]!
+        inputs: [JobInput]!
         status: Status!
         status_message: String!
         status_location: String!
@@ -73,7 +116,7 @@ const typeDefs = gql`
         progress: Int!
         tags: [String]!
     }
-    
+
     enum Status {
         accepted
         succeeded
@@ -81,13 +124,13 @@ const typeDefs = gql`
         failed
         running
     }
-    
-    type Input {
+
+    type JobInput {
         id: ID!
         value: String!
         href: String
     }
-    type Output {
+    type JobOutput {
         id: ID!
         href: String
     }
@@ -97,6 +140,8 @@ const typeDefs = gql`
         name: String!
         path: String
         created: String!
+        owner: String
+        downloads: Int!
     }
 
     type Dataset {
