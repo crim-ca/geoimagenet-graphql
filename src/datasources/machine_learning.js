@@ -1,5 +1,6 @@
 const {AuthDataSource} = require('./AuthDataSource');
 const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
+const {typeDefs: {Patch}} = require('../schema');
 const fs = require('fs');
 
 function to_readable_date(string) {
@@ -7,15 +8,23 @@ function to_readable_date(string) {
     return `${date.toLocaleDateString('default')} ${date.toLocaleTimeString('default')}`;
 }
 
+type api_response = {
+    data: {
+        patches: Array<Patch>
+    },
+    uuid: string,
+    created: string,
+    finished: string,
+};
+
 class MLAPI extends AuthDataSource {
-    constructor(baseURL, GEOIMAGENET_API_URL, MODEL_STORAGE_PATH) {
+    constructor(baseURL: string, GEOIMAGENET_API_URL: string) {
         super();
         this.baseURL = baseURL;
         this.GEOIMAGENET_API_URL = GEOIMAGENET_API_URL;
-        this.MODEL_STORAGE_PATH = MODEL_STORAGE_PATH;
     }
 
-    async dataset_reducer(full_dataset) {
+    async dataset_reducer(full_dataset: api_response) {
 
         const patches = full_dataset.data['patches'];
         let classes = {};
@@ -114,37 +123,6 @@ class MLAPI extends AuthDataSource {
         return [];
     }
 
-    async store_model({stream, filename}) {
-        const path = `${this.MODEL_STORAGE_PATH}/${filename}`;
-        return new Promise((resolve, reject) => {
-            stream
-                .on('error', error => {
-                    if (stream.truncated) {
-                        fs.unlinkSync(path);
-                    }
-                    reject(error)
-                })
-                .pipe(fs.createWriteStream(path))
-                .on('error', error => reject(error))
-                .on('finish', () => resolve({path}))
-        });
-    }
-
-    async upload_model(model_name, file) {
-        const {stream, filename, mimetype, encoding} = await file;
-        // TODO validate mimetype, encoding, stuff
-        const {path} = await this.store_model({stream, filename});
-        const res = await this.post('models', {
-            model_name: model_name,
-            model_path: path,
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        return this.model_reducer(res.data.model);
-    }
-
     job_reducer(job) {
         return {
             ...job,
@@ -203,4 +181,4 @@ class MLAPI extends AuthDataSource {
     }
 }
 
-module.exports = MLAPI;
+module.exports = {MLAPI};

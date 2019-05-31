@@ -1,1 +1,7 @@
 node_modules
+dist
+.idea
+flow-typed
+coverage
+.graphqlconfig
+schema.graphql

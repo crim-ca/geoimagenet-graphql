@@ -17,8 +17,7 @@ function job_output_reducer(output) {
 }
 
 class GINAPI extends AuthDataSource {
-
-    constructor(baseURL) {
+    constructor(baseURL: string) {
         super();
         this.baseURL = baseURL;
     }
