@@ -9,6 +9,6 @@ module.exports = {
     },
     Mutation: {
         start_batch: (_, _1, {dataSources}) => dataSources.MLAPI.launch_batch(),
-        upload_model: (_, {model_name, file}, {dataSources}) => dataSources.MLAPI.upload_model(model_name, file),
+        upload_model: (_, {model_name, file}, {dataSources}) => dataSources.model_data_source.upload_model(model_name, file),
     },
 };

@@ -52,7 +52,7 @@ const typeDefs = gql`
     }
 
     type ModelUploadResponse {
-        success: Int!
+        success: Boolean!
         message: String!
         model: Model
     }
@@ -185,4 +185,4 @@ const typeDefs = gql`
 
 `;
 
-module.exports = typeDefs;
+module.exports = {typeDefs};
