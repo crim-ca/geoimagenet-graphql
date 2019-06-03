@@ -1,5 +1,6 @@
 // @flow
 const {AuthDataSource} = require('./AuthDataSource');
+const Raven = require('raven');
 const stream = require('stream');
 const fs = require('fs');
 const sanitize = require('sanitize-filename');
@@ -49,7 +50,7 @@ class ModelDataSource extends AuthDataSource {
         try {
             path = await this.store_model({stream, filename});
         } catch (e) {
-            // TODO sentry this
+            Raven.captureException(e);
             return this.model_upload_response(false, "We were unable to save the file");
         }
 
@@ -64,7 +65,7 @@ class ModelDataSource extends AuthDataSource {
                 }
             });
         } catch (e) {
-            // TODO sentry this
+            Raven.captureException(e);
             await fs.unlinkSync(path);
             return this.model_upload_response(false, e.message);
         }
