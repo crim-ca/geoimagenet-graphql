@@ -66,7 +66,6 @@ class ModelDataSource extends AuthDataSource {
             });
         } catch (e) {
             Raven.captureException(e);
-            Raven.captureMessage(`tried to save model at path ${path} with name ${model_name}`);
             await fs.unlinkSync(path);
             return this.model_upload_response(false, e.message);
         }
