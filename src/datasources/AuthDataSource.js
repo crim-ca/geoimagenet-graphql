@@ -1,8 +1,15 @@
-const {RESTDataSource} = require('apollo-datasource-rest');
+// @flow
+const {RESTDataSource, RequestOptions} = require('apollo-datasource-rest');
 
 class AuthDataSource extends RESTDataSource {
-    willSendRequest(request) {
-        request.headers.set('cookie', this.context.cookie);
+
+    constructor(base_url: string) {
+        super();
+        this.baseURL = base_url;
+    }
+
+    willSendRequest(request: RequestOptions) {
+        request.headers.set('Cookie', this.context.cookie);
     }
 }
 

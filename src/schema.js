@@ -4,16 +4,16 @@ const typeDefs = gql`
 
     type Query {
         datasets(status: Status): [Dataset]!
-        models: [Model]!
-        benchmarks: [Benchmark]!
+        models: [Model!]!
+        benchmarks: [Benchmark!]!
         processes: [Process!]!
         process(process_id: ID!): Process
-        jobs(process_id: ID!): [Job]!
+        jobs(process_id: ID!): [Job!]!
         job(process_id: ID!, job_id: ID!): Job
     }
 
     type Subscription {
-        jobs: [Job]!
+        jobs(process_id: ID!): [Job!]!
     }
 
     type Mutation {
@@ -21,6 +21,7 @@ const typeDefs = gql`
             model_name: String!,
             file: Upload!
         ): ModelUploadResponse!
+        launch_test(model_id: ID!): JobLaunchResponse!
         start_batch: JobLaunchResponse!
         launch_benchmark(model_id: ID!): JobLaunchResponse!
     }
@@ -28,6 +29,7 @@ const typeDefs = gql`
     type JobLaunchResponse {
         success: Boolean!
         job: Job
+        message: String
     }
 
     type ApiResponse {

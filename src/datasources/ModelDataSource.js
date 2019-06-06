@@ -36,8 +36,7 @@ function validate_or_create_path(path: string): Promise<string> {
 
 class ModelDataSource extends AuthDataSource {
     constructor(ml_endpoint: string, shared_volume_path: string) {
-        super();
-        this.baseURL = ml_endpoint;
+        super(ml_endpoint);
         this.shared_volume_path = shared_volume_path;
     }
 

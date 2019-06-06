@@ -1,3 +1,5 @@
+const {pubsub} = require('./utils');
+
 module.exports = {
     Query: {
         datasets: (_, {status}, {dataSources}) => dataSources.MLAPI.get_all_datasets(status),
@@ -8,7 +10,11 @@ module.exports = {
         process: (_, {process_id}, {dataSources}) => dataSources.MLAPI.get_process(process_id),
     },
     Mutation: {
+        launch_test: (_, {model_id}, {dataSources}) => dataSources.jobs.launch_model_test_job(model_id),
         start_batch: (_, _1, {dataSources}) => dataSources.MLAPI.launch_batch(),
         upload_model: (_, {model_name, file}, {dataSources}) => dataSources.model_data_source.upload_model(model_name, file),
     },
+    Subscription: {
+        jobs: (_, {process_id}) => pubsub.asyncIterator([process_id])
+    }
 };
