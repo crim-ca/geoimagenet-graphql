@@ -6,6 +6,7 @@ const resolvers = require('./resolvers');
 const {MLAPI} = require('./datasources/machine_learning');
 const {GINAPI} = require('./datasources/geoimagenet_api');
 const {ModelDataSource} = require('./datasources/ModelDataSource');
+const {Jobs} = require('./datasources/Jobs');
 
 export class GIN_GraphQL {
 
@@ -28,7 +29,8 @@ export class GIN_GraphQL {
             dataSources: () => ({
                 MLAPI: new MLAPI(this.ml_endpoint, this.geoimagenet_api_endpoint),
                 GINAPI: new GINAPI(this.geoimagenet_api_endpoint),
-                model_data_source: new ModelDataSource(this.ml_endpoint, this.model_storage_path)
+                model_data_source: new ModelDataSource(this.ml_endpoint, this.model_storage_path),
+                jobs: new Jobs(this.ml_endpoint),
             }),
         });
 

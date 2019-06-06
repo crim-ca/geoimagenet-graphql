@@ -19,8 +19,7 @@ type api_response = {
 
 class MLAPI extends AuthDataSource {
     constructor(baseURL: string, GEOIMAGENET_API_URL: string) {
-        super();
-        this.baseURL = baseURL;
+        super(baseURL);
         this.GEOIMAGENET_API_URL = GEOIMAGENET_API_URL;
     }
 
