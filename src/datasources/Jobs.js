@@ -106,6 +106,32 @@ class Jobs extends AuthDataSource {
         };
     }
 
+    async benchmark_visibility(job_id: string, visibility: string) {
+        let response;
+        try {
+            response = await this.put(`processes/model-tester/jobs/${job_id}`, {
+                visibility: visibility
+            });
+        } catch (e) {
+            if (e.extensions.response.status === 403) {
+                return {
+                    success: false,
+                    message: "You don't have permissions to update that job status."
+                };
+            }
+            Sentry.captureException(e);
+            return {
+                success: false,
+                message: 'We were unable to modify the job state.'
+            };
+        }
+        const {data: {uuid}} = response;
+        return {
+            success: true,
+            job: await this.get_job('model-tester', uuid),
+        };
+    }
+
     job_reducer(job) {
         return {
             ...job,

@@ -12,6 +12,7 @@ module.exports = {
     Mutation: {
         launch_test: (_, {model_id}, {dataSources}) => dataSources.jobs.launch_model_test_job(model_id),
         start_batch: (_, _1, {dataSources}) => dataSources.jobs.launch_batch(),
+        benchmark_visibility: (_, {job_id, visibility}, {dataSources}) => dataSources.jobs.benchmark_visibility(job_id, visibility),
         upload_model: (_, {model_name, file}, {dataSources}) => dataSources.model_data_source.upload_model(model_name, file),
     },
     Subscription: {

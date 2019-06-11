@@ -21,12 +21,15 @@ const typeDefs = gql`
             model_name: String!,
             file: Upload!
         ): ModelUploadResponse!
-        launch_test(model_id: ID!): JobLaunchResponse!
-        start_batch: JobLaunchResponse!
-        launch_benchmark(model_id: ID!): JobLaunchResponse!
+        launch_test(model_id: ID!): JobMutationResponse!
+        start_batch: JobMutationResponse!
+        benchmark_visibility(
+            job_id: ID!,
+            visibility: Visibility!
+        ): JobMutationResponse!
     }
 
-    type JobLaunchResponse {
+    type JobMutationResponse {
         success: Boolean!
         job: Job
         message: String
@@ -105,7 +108,7 @@ const typeDefs = gql`
         task: String!
         service: String
         user: String
-        inputs: [JobInput]!
+        inputs: [JobInput!]!
         status: Status!
         status_message: String!
         status_location: String!
@@ -115,8 +118,14 @@ const typeDefs = gql`
         started: String!
         finished: String
         duration: String
+        visibility: Visibility!
         progress: Int!
         tags: [String]!
+    }
+
+    enum Visibility {
+        private
+        public
     }
 
     enum Status {
