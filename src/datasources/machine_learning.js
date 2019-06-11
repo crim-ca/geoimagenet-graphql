@@ -18,10 +18,6 @@ type api_response = {
 };
 
 class MLAPI extends AuthDataSource {
-    constructor(baseURL: string, GEOIMAGENET_API_URL: string) {
-        super(baseURL);
-        this.GEOIMAGENET_API_URL = GEOIMAGENET_API_URL;
-    }
 
     async dataset_reducer(full_dataset: api_response) {
 
@@ -122,29 +118,7 @@ class MLAPI extends AuthDataSource {
         return [];
     }
 
-    job_reducer(job) {
-        return {
-            ...job,
-            id: job.uuid,
-            inputs: job.inputs.map(input => job_input_reducer(input)),
-            created: to_readable_date(job.created),
-            started: to_readable_date(job.started),
-            finished: to_readable_date(job.finished),
-        };
-    }
-
-    async get_all_jobs(process_id) {
-        const res = await this.get(`processes/${process_id}/jobs`);
-        const fetch_jobs_statuses = res.data.jobs.map(job => this.get(`processes/${process_id}/jobs/${job.uuid}`));
-        const responses = await Promise.all(fetch_jobs_statuses);
-        return responses.map(job_response => this.job_reducer(job_response.data.job));
-    }
-
-    async get_job(process_id, job_id) {
-        const res = await this.get(`processes/${process_id}/jobs/${job_id}`);
-        return this.job_reducer(res.data.job);
-    }
-
+    // unused anymore? what was this for...
     async api_response_reducer(launch_batch_response) {
         const {sent_to_ml, response_from_ml, detail} = launch_batch_response;
         return {
@@ -155,28 +129,6 @@ class MLAPI extends AuthDataSource {
             mlReceived: response_from_ml,
             detail: detail
         }
-    }
-
-    async launch_batch() {
-        const launch_batch_response = await this.post(`processes/batch-creation/jobs`, JSON.stringify({
-            inputs: [
-                {id: 'name', value: Date.now()},
-                {
-                    id: 'geojson_urls',
-                    value: `${this.GEOIMAGENET_API_URL}/batches/annotations`,
-                },
-            ]
-        }), {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        const {job_uuid} = launch_batch_response.data;
-        const job = await this.get_job('batch-creation', job_uuid);
-        return {
-            success: launch_batch_response.meta.code === 200,
-            job: job,
-        };
     }
 }
 

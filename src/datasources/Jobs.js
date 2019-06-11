@@ -12,6 +12,11 @@ function to_readable_date(string) {
 
 class Jobs extends AuthDataSource {
 
+    constructor(base_url: string, gin_api_endpoint: string) {
+        super(base_url);
+        this.geoimagenet_api_endpoint = gin_api_endpoint;
+    }
+
     async launch_model_test_job(model_id: string): Promise<JobLaunchResponse> {
 
         let dataset_id;
@@ -60,6 +65,45 @@ class Jobs extends AuthDataSource {
     async get_job(process_id, job_id) {
         const res = await this.get(`processes/${process_id}/jobs/${job_id}`);
         return this.job_reducer(res.data.job);
+    }
+
+    async get_all_jobs(process_id) {
+        const res = await this.get(`processes/${process_id}/jobs`);
+        const fetch_jobs_statuses = res.data.jobs.map(job => this.get(`processes/${process_id}/jobs/${job.uuid}`));
+        const responses = await Promise.all(fetch_jobs_statuses);
+        return responses.map(job_response => this.job_reducer(job_response.data.job));
+    }
+
+    async launch_batch() {
+        let launch_batch_response;
+        try {
+            launch_batch_response = await this.post(`processes/batch-creation/jobs`, JSON.stringify({
+                inputs: [
+                    {id: 'name', value: Date.now()},
+                    {
+                        id: 'geojson_urls',
+                        value: `${this.geoimagenet_api_endpoint}/batches/annotations`,
+                    },
+                ]
+            }), {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        } catch (e) {
+            Sentry.captureException(e);
+            return {
+                success: false,
+                message: e.extensions.response.statusText,
+            };
+        }
+
+        const {job_uuid} = launch_batch_response.data;
+        const job = await this.get_job('batch-creation', job_uuid);
+        return {
+            success: launch_batch_response.meta.code === 200,
+            job: job,
+        };
     }
 
     job_reducer(job) {

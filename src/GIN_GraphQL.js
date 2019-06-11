@@ -27,10 +27,10 @@ export class GIN_GraphQL {
                 }
             },
             dataSources: () => ({
-                MLAPI: new MLAPI(this.ml_endpoint, this.geoimagenet_api_endpoint),
+                MLAPI: new MLAPI(this.ml_endpoint),
                 GINAPI: new GINAPI(this.geoimagenet_api_endpoint),
                 model_data_source: new ModelDataSource(this.ml_endpoint, this.model_storage_path),
-                jobs: new Jobs(this.ml_endpoint),
+                jobs: new Jobs(this.ml_endpoint, this.geoimagenet_api_endpoint),
             }),
         });
 
