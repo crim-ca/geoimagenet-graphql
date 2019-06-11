@@ -77,15 +77,15 @@ class Jobs extends AuthDataSource {
     }
 
     async get_all_jobs(process_id: string, user_id: string) {
-        const jobs = await this.fetch_all_jobs_from_ml_api(process_id);
-        const filtered_jobs = jobs.filter(job => job.user = user_id);
+        const all_jobs = await this.fetch_all_jobs_from_ml_api(process_id);
+        const filtered_jobs = all_jobs.filter(job => job.user = user_id);
         return filtered_jobs.map(job => this.job_reducer(job));
     }
 
     async get_public_benchmarks() {
-        const all_benchmark_jobs = await this.fetch_all_jobs_from_ml_api(JOB_MODEL_TEST);
-        const public_benchmark_jobs = all_benchmark_jobs.filter(job => job.visibility === 'public');
-        return public_benchmark_jobs.map(job => this.job_reducer(job));
+        const all_jobs = await this.fetch_all_jobs_from_ml_api(JOB_MODEL_TEST);
+        const public_jobs = all_jobs.filter(job => job.visibility === 'public');
+        return public_jobs.map(job => this.job_reducer(job));
     }
 
     async launch_batch() {
