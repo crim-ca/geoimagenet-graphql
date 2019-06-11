@@ -5,6 +5,8 @@ const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
 const Sentry = require('@sentry/node');
 const {pubsub} = require('../utils');
 
+const JOB_MODEL_TEST = 'model-tester';
+
 function to_readable_date(string) {
     const date = new Date(string);
     return `${date.toLocaleDateString('default')} ${date.toLocaleTimeString('default')}`;
@@ -32,10 +34,10 @@ class Jobs extends AuthDataSource {
 
         try {
             const job_data = await this.api_job_launch_request(model_id, dataset_id);
-            pubsub.publish('model-tester', job_data);
+            pubsub.publish(JOB_MODEL_TEST, job_data);
             return {
                 success: true,
-                job: await this.get_job('model-tester', job_data.job_uuid),
+                job: await this.get_job(JOB_MODEL_TEST, job_data.job_uuid),
             };
         } catch (e) {
             console.log(e);
@@ -53,7 +55,7 @@ class Jobs extends AuthDataSource {
     }
 
     async api_job_launch_request(model_id: string, dataset_id: string): Promise<any> {
-        const res = await this.post(`/processes/model-tester/jobs`, {
+        const res = await this.post(`/processes/${JOB_MODEL_TEST}/jobs`, {
             inputs: [
                 {id: 'dataset', value: dataset_id},
                 {id: 'model', value: model_id},
@@ -67,11 +69,23 @@ class Jobs extends AuthDataSource {
         return this.job_reducer(res.data.job);
     }
 
-    async get_all_jobs(process_id) {
+    async fetch_all_jobs_from_ml_api(process_id: string) {
         const res = await this.get(`processes/${process_id}/jobs`);
         const fetch_jobs_statuses = res.data.jobs.map(job => this.get(`processes/${process_id}/jobs/${job.uuid}`));
-        const responses = await Promise.all(fetch_jobs_statuses);
-        return responses.map(job_response => this.job_reducer(job_response.data.job));
+        const all_jobs = await Promise.all(fetch_jobs_statuses);
+        return all_jobs.map(job_response => job_response.data.job);
+    }
+
+    async get_all_jobs(process_id: string, user_id: string) {
+        const all_jobs = await this.fetch_all_jobs_from_ml_api(process_id);
+        const filtered_jobs = all_jobs.filter(job => job.user === user_id);
+        return filtered_jobs.map(job => this.job_reducer(job));
+    }
+
+    async get_public_benchmarks() {
+        const all_jobs = await this.fetch_all_jobs_from_ml_api(JOB_MODEL_TEST);
+        const public_jobs = all_jobs.filter(job => job.visibility === 'public');
+        return public_jobs.map(job => this.job_reducer(job));
     }
 
     async launch_batch() {
@@ -109,7 +123,7 @@ class Jobs extends AuthDataSource {
     async benchmark_visibility(job_id: string, visibility: string) {
         let response;
         try {
-            response = await this.put(`processes/model-tester/jobs/${job_id}`, {
+            response = await this.put(`processes/${JOB_MODEL_TEST}/jobs/${job_id}`, {
                 visibility: visibility
             });
         } catch (e) {
@@ -128,11 +142,11 @@ class Jobs extends AuthDataSource {
         const {data: {job: {uuid}}} = response;
         return {
             success: true,
-            job: await this.get_job('model-tester', uuid),
+            job: await this.get_job(JOB_MODEL_TEST, uuid),
         };
     }
 
-    job_reducer(job) {
+    job_reducer(job: any) {
         return {
             ...job,
             id: job.uuid,
