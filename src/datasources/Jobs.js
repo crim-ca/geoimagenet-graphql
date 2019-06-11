@@ -125,7 +125,7 @@ class Jobs extends AuthDataSource {
                 message: 'We were unable to modify the job state.'
             };
         }
-        const {data: {uuid}} = response;
+        const {data: {job: {uuid}}} = response;
         return {
             success: true,
             job: await this.get_job('model-tester', uuid),
