@@ -1,8 +1,14 @@
 // @flow
 const {AuthDataSource} = require('./AuthDataSource');
 const {JobLaunchResponse} = require('../schema');
+const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
 const Sentry = require('@sentry/node');
 const {pubsub} = require('../utils');
+
+function to_readable_date(string) {
+    const date = new Date(string);
+    return `${date.toLocaleDateString('default')} ${date.toLocaleTimeString('default')}`;
+}
 
 class Jobs extends AuthDataSource {
 
@@ -24,7 +30,7 @@ class Jobs extends AuthDataSource {
             pubsub.publish('model-tester', job_data);
             return {
                 success: true,
-                job: job_data,
+                job: await this.get_job('model-tester', job_data.job_uuid),
             };
         } catch (e) {
             console.log(e);
@@ -49,6 +55,22 @@ class Jobs extends AuthDataSource {
             ]
         });
         return res.data;
+    }
+
+    async get_job(process_id, job_id) {
+        const res = await this.get(`processes/${process_id}/jobs/${job_id}`);
+        return this.job_reducer(res.data.job);
+    }
+
+    job_reducer(job) {
+        return {
+            ...job,
+            id: job.uuid,
+            inputs: job.inputs.map(input => job_input_reducer(input)),
+            created: to_readable_date(job.created),
+            started: to_readable_date(job.started),
+            finished: to_readable_date(job.finished),
+        };
     }
 
 }
