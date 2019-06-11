@@ -2,6 +2,7 @@
 const {ApolloServer} = require('apollo-server');
 const {typeDefs} = require('./schema');
 const resolvers = require('./resolvers');
+const fetch = require('node-fetch');
 
 const {MLAPI} = require('./datasources/machine_learning');
 const {GINAPI} = require('./datasources/geoimagenet_api');
@@ -14,6 +15,7 @@ export class GIN_GraphQL {
         this.model_storage_path = process.env.RAW_MODEL_STORAGE_PATH || throw new TypeError(`The "RAW_MODEL_STORAGE_PATH" variable should be set in the environment.`);
         this.ml_endpoint = process.env.ML_ENDPOINT || throw new TypeError(`The "ML_ENDPOINT" variable should be set in the environment.`);
         this.geoimagenet_api_endpoint = process.env.GEOIMAGENET_API_URL || throw new TypeError(`The "GEOIMAGENET_API_URL" variable should be set in the environment.`);
+        this.magpie_endpoint = process.env.MAGPIE_ENDPOINT || throw new TypeError(`The "MAGPIE_ENDPOINT" variable should be set in the environment.`);
     }
 
     initialize() {
@@ -22,8 +24,22 @@ export class GIN_GraphQL {
             typeDefs,
             resolvers,
             context: async ({req}) => {
+                const response = await fetch(`${this.magpie_endpoint}/session`, {
+                    headers: {
+                        cookie: req.headers.cookie
+                    }
+                });
+                const json = await response.json();
+                const {authenticated, user} = json;
+                if (authenticated) {
+                    const {user_id} = user;
+                    return {
+                        cookie: req.headers.cookie,
+                        user_id: user_id
+                    }
+                }
                 return {
-                    cookie: req.headers.cookie
+                    cookie: req.headers.cookie,
                 }
             },
             dataSources: () => ({

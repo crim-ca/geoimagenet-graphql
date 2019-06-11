@@ -69,18 +69,23 @@ class Jobs extends AuthDataSource {
         return this.job_reducer(res.data.job);
     }
 
-    async get_all_jobs(process_id) {
+    async fetch_all_jobs_from_ml_api(process_id: string) {
         const res = await this.get(`processes/${process_id}/jobs`);
         const fetch_jobs_statuses = res.data.jobs.map(job => this.get(`processes/${process_id}/jobs/${job.uuid}`));
-        const responses = await Promise.all(fetch_jobs_statuses);
-        return responses.map(job_response => this.job_reducer(job_response.data.job));
+        const all_jobs = await Promise.all(fetch_jobs_statuses);
+        return all_jobs.map(job_response => job_response.data.job);
+    }
+
+    async get_all_jobs(process_id: string, user_id: string) {
+        const jobs = await this.fetch_all_jobs_from_ml_api(process_id);
+        const filtered_jobs = jobs.filter(job => job.user = user_id);
+        return filtered_jobs.map(job => this.job_reducer(job));
     }
 
     async get_public_benchmarks() {
-        const all_benchmark_jobs = await this.get_all_jobs(JOB_MODEL_TEST);
-        return all_benchmark_jobs.filter(job => {
-            return job.visibility === 'public';
-        });
+        const all_benchmark_jobs = await this.fetch_all_jobs_from_ml_api(JOB_MODEL_TEST);
+        const public_benchmark_jobs = all_benchmark_jobs.filter(job => job.visibility === 'public');
+        return public_benchmark_jobs.map(job => this.job_reducer(job));
     }
 
     async launch_batch() {

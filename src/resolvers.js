@@ -4,7 +4,7 @@ module.exports = {
     Query: {
         datasets: (_, {status}, {dataSources}) => dataSources.MLAPI.get_all_datasets(status),
         models: (_, __, {dataSources}) => dataSources.MLAPI.get_all_models(),
-        jobs: (_, {process_id}, {dataSources}) => dataSources.jobs.get_all_jobs(process_id),
+        jobs: (_, {process_id}, {dataSources, user_id}) => dataSources.jobs.get_all_jobs(process_id, user_id),
         public_benchmarks: (_, __, {dataSources}) => dataSources.jobs.get_public_benchmarks(),
         benchmarks: (_, __, {dataSources}) => dataSources.MLAPI.get_all_benchmarks(),
         processes: (_, __, {dataSources}) => dataSources.MLAPI.get_all_processes(),
