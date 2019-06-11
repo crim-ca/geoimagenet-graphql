@@ -8,6 +8,7 @@ const typeDefs = gql`
         benchmarks: [Benchmark!]!
         processes: [Process!]!
         process(process_id: ID!): Process
+        public_benchmarks: [Job!]!
         jobs(process_id: ID!): [Job!]!
         job(process_id: ID!, job_id: ID!): Job
     }
