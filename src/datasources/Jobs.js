@@ -89,9 +89,9 @@ class Jobs extends AuthDataSource {
     }
 
     async launch_batch() {
-        let launch_batch_response;
+        let result;
         try {
-            launch_batch_response = await this.post(`processes/batch-creation/jobs`, JSON.stringify({
+            result = await this.post(`processes/batch-creation/jobs`, JSON.stringify({
                 inputs: [
                     {id: 'name', value: Date.now()},
                     {
@@ -112,10 +112,10 @@ class Jobs extends AuthDataSource {
             };
         }
 
-        const {job_uuid} = launch_batch_response.data;
+        const {job_uuid} = result.data;
         const job = await this.get_job('batch-creation', job_uuid);
         return {
-            success: launch_batch_response.meta.code === 200,
+            success: result.meta.code === 200,
             job: job,
         };
     }

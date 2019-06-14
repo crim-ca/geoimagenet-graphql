@@ -23,7 +23,7 @@ const typeDefs = gql`
             file: Upload!
         ): ModelUploadResponse!
         launch_test(model_id: ID!): JobMutationResponse!
-        start_batch: JobMutationResponse!
+        launch_dataset_creation_job: JobMutationResponse!
         benchmark_visibility(
             job_id: ID!,
             visibility: Visibility!
