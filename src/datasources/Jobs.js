@@ -115,16 +115,12 @@ class Jobs extends AuthDataSource {
     }
 
     benchmark_reducer(job) {
-        const {user, outputs, inputs} = job;
-        const dataset_id = inputs.find(dict => dict.id === 'dataset');
+        const {user, outputs} = job;
         const summary = outputs.find(dict => dict.id === 'summary');
         const metrics = outputs.find(dict => dict.id === 'metrics');
         return {
             job: job,
             owner: user,
-            uploaded: '',
-            tested: '',
-            dataset_id: dataset_id,
             result: {
                 summary: summary && summary.value ? summary.value : {},
                 metrics: metrics && metrics.value ? metrics.value : {
@@ -138,7 +134,6 @@ class Jobs extends AuthDataSource {
             },
         };
     }
-
 
     async launch_batch() {
         let result;
