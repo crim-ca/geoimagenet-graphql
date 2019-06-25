@@ -25,7 +25,7 @@ pipeline {
 
         stage('Deploy') {
             when {
-                environment name: 'GIT_LOCAL_BRANCH', value: 'release*'
+                expression { ${GIT_LOCAL_BRANCH}.startsWith('release') }
             }
             steps {
                 sh 'docker tag $LOCAL_IMAGE_NAME $TAGGED_IMAGE_NAME'
