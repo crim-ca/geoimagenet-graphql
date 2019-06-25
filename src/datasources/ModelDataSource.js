@@ -5,6 +5,7 @@ const stream = require('stream');
 const fs = require('fs');
 const sanitize = require('sanitize-filename');
 const {typeDefs: {Model}} = require('../schema');
+const {to_readable_date} = require('../utils');
 
 function make_model_root(date: Date, shared_volume_path: string) {
     const year = date.getFullYear();
@@ -102,6 +103,17 @@ class ModelDataSource extends AuthDataSource {
                     resolve(path);
                 })
         });
+    }
+
+    async get_model(model_id) {
+        const model_detail_response = await this.get(`models/${model_id}`);
+        const full_model = model_detail_response.data.model;
+        return {
+            id: full_model.uuid,
+            name: full_model.name,
+            created: to_readable_date(full_model.created),
+            path: full_model.path,
+        };
     }
 }
 
