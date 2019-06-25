@@ -64,7 +64,7 @@ class Jobs extends AuthDataSource {
         return res.data;
     }
 
-    async get_job(process_id, job_id) {
+    async get_job(process_id: string, job_id: string) {
         const res = await this.get(`processes/${process_id}/jobs/${job_id}`);
         return this.job_reducer(res.data.job);
     }
@@ -82,10 +82,57 @@ class Jobs extends AuthDataSource {
         return filtered_jobs.map(job => this.job_reducer(job));
     }
 
+    /*
+    we need to compose the benchmarks
+    they are an aggregate of data from multiple sources
+    we first need to know what model was tested
+      (model_id, owner, when the model was uploaded, when it was tested, what was the dataset)
+    then we need the results from the test job itself.
+     */
     async get_public_benchmarks() {
+
+        // we first need all the public model-tester jobs ids
         const all_jobs = await this.fetch_all_jobs_from_ml_api(JOB_MODEL_TEST);
-        const public_jobs = all_jobs.filter(job => job.visibility === 'public');
-        return public_jobs.map(job => this.job_reducer(job));
+        const public_jobs_ids = all_jobs
+            .filter(job => job.visibility === 'public')
+            .map(job => job.uuid);
+
+        // we then get all those jobs information and extract the data portion
+        const public_jobs_information_responses = await Promise.all(public_jobs_ids
+            .map(uuid => this.get(`processes/${JOB_MODEL_TEST}/jobs/${uuid}`)));
+        const jobs_information = public_jobs_information_responses.map(({data: {job}}) => job);
+
+        // we now fetch all the jobs results and aggregate those to the existing jobs objects
+        const public_jobs_results_responses = await Promise.all(public_jobs_ids
+            .map(uuid => this.get(`processes/${JOB_MODEL_TEST}/jobs/${uuid}/result`)));
+        public_jobs_results_responses.forEach(response => {
+            const {meta: {job_uuid}, data: {outputs}} = response;
+            const existant_job = jobs_information.find(elem => elem.uuid === job_uuid);
+            Object.assign(existant_job, {outputs});
+        });
+
+        return jobs_information.map(job => this.benchmark_reducer(job));
+    }
+
+    benchmark_reducer(job) {
+        const {user, outputs} = job;
+        const summary = outputs.find(dict => dict.id === 'summary');
+        const metrics = outputs.find(dict => dict.id === 'metrics');
+        return {
+            job: job,
+            owner: user,
+            result: {
+                summary: summary && summary.value ? summary.value : {},
+                metrics: metrics && metrics.value ? metrics.value : {
+                    top_1_accuracy: 0,
+                    top_5_accuracy: 0,
+                },
+                samples: [],
+                classes: [],
+                mapping: [],
+                predictions: [],
+            },
+        };
     }
 
     async launch_batch() {

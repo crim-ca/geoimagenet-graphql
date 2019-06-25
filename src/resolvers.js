@@ -18,5 +18,15 @@ module.exports = {
     },
     Subscription: {
         jobs: (_, {process_id}) => pubsub.asyncIterator([process_id])
+    },
+    Benchmark: {
+        model: (benchmark, _, {dataSources}) => {
+            const model_id = benchmark.job.inputs.find(dict => dict.id === 'model').value;
+            return dataSources.model_data_source.get_model(model_id);
+        },
+        dataset: (benchmark, _, {dataSources}) => {
+            const dataset_id = benchmark.job.inputs.find(dict => dict.id === 'dataset').value;
+            return dataSources.MLAPI.get_dataset(dataset_id);
+        },
     }
 };

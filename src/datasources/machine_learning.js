@@ -1,12 +1,9 @@
 const {AuthDataSource} = require('./AuthDataSource');
 const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
 const {typeDefs: {Patch}} = require('../schema');
-const fs = require('fs');
+const {to_readable_date} = require('../utils');
 
-function to_readable_date(string) {
-    const date = new Date(string);
-    return `${date.toLocaleDateString('default')} ${date.toLocaleTimeString('default')}`;
-}
+
 
 type api_response = {
     data: {
@@ -77,8 +74,9 @@ class MLAPI extends AuthDataSource {
         return responses.map(response => this.process_reducer(response.data.process));
     }
 
-    async get_all_benchmarks() {
-
+    async get_dataset(dataset_id) {
+        const response = await this.get(`datasets/${dataset_id}`);
+        return this.dataset_reducer(response.data.dataset);
     }
 
     async model_reducer(model) {
