@@ -1,4 +1,14 @@
-import {GIN_GraphQL} from "./GIN_GraphQL";
+// @flow
+
+const {GIN_GraphQL} = require('./GIN_GraphQL');
+const fetchMock = require('fetch-mock');
+const {MODEL_TESTER_RESULT} = require('./test_data');
+const {ApolloServer, gql} = require('apollo-server');
+const {create_GIN_GraphQL_server, create_datasources} = require('./GIN_GraphQL');
+const {createTestClient} = require('apollo-server-testing');
+const {resolvers} = require('./resolvers');
+const {typeDefs} = require('./schema');
+const {Jobs} = require('./datasources/Jobs');
 
 const should_throw_because_no_env = () => {
     new GIN_GraphQL();
@@ -33,4 +43,48 @@ test('server lifetime', () => {
     const graph = new GIN_GraphQL();
     graph.initialize();
     graph.stop();
+});
+
+test('we can transform ml api response in usable data', async () => {
+
+    const benchmarks_query = gql`
+        query benchmarks {
+            public_benchmarks {
+                owner
+                result {
+                    metrics {
+                        top_1_accuracy
+                        top_5_accuracy
+                    }
+                }
+            }
+        }
+    `;
+
+    const job_api = new Jobs('http://ml', 'http://gin-api');
+    job_api.get = jest.fn(() => MODEL_TESTER_RESULT);
+
+    const server = new ApolloServer({
+        typeDefs,
+        resolvers,
+        datasources: {
+            ...create_datasources(
+                'http://ml',
+                'http://gin-api',
+                '/data'),
+            jobs: job_api
+        },
+    });
+
+    const {query} = createTestClient(server);
+
+    const public_benchmarks = await query({ query: benchmarks_query });
+    expect(public_benchmarks).toBe([{
+        summary: {},
+        metrics: {},
+        samples: {},
+        classes: {},
+        mapping: {},
+        predictions: {},
+    }]);
 });

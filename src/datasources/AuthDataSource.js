@@ -9,7 +9,9 @@ class AuthDataSource extends RESTDataSource {
     }
 
     willSendRequest(request: RequestOptions) {
-        request.headers.set('Cookie', this.context.cookie);
+        if (this.context && this.context.cookie) {
+            request.headers.set('Cookie', this.context.cookie);
+        }
     }
 }
 

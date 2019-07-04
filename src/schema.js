@@ -8,7 +8,7 @@ const typeDefs = gql`
         benchmarks: [Benchmark!]!
         processes: [Process!]!
         process(process_id: ID!): Process
-        public_benchmarks: [Job!]!
+        public_benchmarks: [Benchmark!]!
         jobs(process_id: ID!): [Job!]!
         job(process_id: ID!, job_id: ID!): Job
     }
@@ -187,14 +187,55 @@ const typeDefs = gql`
     }
 
     type Benchmark {
-        model_id: ID!
-        owner: String!
-        uploaded: String!
-        tested: String!
-        dataset_id: ID!
-        result: String!
+        job: Job
+        model: Model!
+        dataset: Dataset!
+        owner: String
+        result: ModelTesterResult!
+    }
+    
+    type ModelTesterResult {
+        summary: ModelTesterSummary!
+        metrics: ModelTesterMetrics!
+        samples: [ModelTesterSample!]!
+        classes: [ModelTesterClass!]!
+        mapping: [ModelTesterMapping!]!
+        predictions: [ModelTesterPrediction!]!
+    }
+    
+    type ModelTesterSummary {
+        classes_total: Int!
+        classes_mapped: Int!
+        classes_dropped: Int!
+        samples_total: Int!
+        samples_mapped: Int!
+        samples_dropped: Int!
+    }
+    
+    type ModelTesterMetrics {
+        top_1_accuracy: Int!
+        top_5_accuracy: Int!
+    }
+    
+    type ModelTesterSample {
+        class_id: Int!
+        sample_id: String!
     }
 
+    type ModelTesterClass {
+        model_index: Int!
+        class_id: Int!
+    }
+    
+    type ModelTesterMapping {
+        class_id: Int!
+        model_id: String!
+    }
+    
+    type ModelTesterPrediction {
+        class_id: Int!
+        scores: [Float!]!
+    }
 `;
 
 module.exports = {typeDefs};
