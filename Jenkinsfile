@@ -23,6 +23,18 @@ pipeline {
             }
         }
 
+        stage('DeployLatest') {
+            when {
+                expression { return GIT_LOCAL_BRANCH.startsWith("develop") }
+            }
+            steps {
+                sh 'docker tag $LOCAL_IMAGE_NAME $LATEST_IMAGE_NAME'
+                sh 'docker push $LATEST_IMAGE_NAME'
+                sh 'ssh ubuntu@geoimagenetdev.crim.ca "cd ~/compose && ./geoimagenet-compose.sh pull frontend && ./geoimagenet-compose.sh up --force-recreate -d frontend"'
+                slackSend channel: '#geoimagenet-dev', color: 'good', message: "*GeoImageNet Frontend*:\nPushed docker image: `${env.LATEST_IMAGE_NAME}`\nDeployed to: https://geoimagenetdev.crim.ca"
+            }
+        }
+
         stage('Deploy') {
             when {
                 expression { return GIT_LOCAL_BRANCH.startsWith("release") }
