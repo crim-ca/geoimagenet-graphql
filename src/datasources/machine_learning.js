@@ -1,5 +1,5 @@
 const {AuthDataSource} = require('./AuthDataSource');
-const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
+const {job_input_reducer, job_output_reducer} = require('./GeoImageNetAPI');
 const {typeDefs: {Patch}} = require('../schema');
 const {to_readable_date} = require('../utils');
 

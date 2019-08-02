@@ -1,11 +1,16 @@
 // @flow
 const {AuthDataSource} = require('./AuthDataSource');
 const {JobLaunchResponse} = require('../schema');
-const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
+const {job_input_reducer, job_output_reducer} = require('./GeoImageNetAPI');
 const Sentry = require('@sentry/node');
 const {pubsub} = require('../utils');
 
 const JOB_MODEL_TEST = 'model-tester';
+
+type JobFromMachineLearningAPI = {
+    user: Object,
+    outputs: Object,
+};
 
 function to_readable_date(string) {
     const date = new Date(string);
@@ -114,7 +119,8 @@ class Jobs extends AuthDataSource {
         return jobs_information.map(job => this.benchmark_reducer(job));
     }
 
-    benchmark_reducer(job) {
+    benchmark_reducer(job: JobFromMachineLearningAPI) {
+
         const {user, outputs} = job;
         const summary = outputs.find(dict => dict.id === 'summary');
         const metrics = outputs.find(dict => dict.id === 'metrics');

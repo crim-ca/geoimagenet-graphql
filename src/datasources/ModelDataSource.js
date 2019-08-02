@@ -105,7 +105,7 @@ class ModelDataSource extends AuthDataSource {
         });
     }
 
-    async get_model(model_id) {
+    async get_model(model_id: number) {
         const model_detail_response = await this.get(`models/${model_id}`);
         const full_model = model_detail_response.data.model;
         return {
