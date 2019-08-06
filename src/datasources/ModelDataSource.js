@@ -13,6 +13,7 @@ function make_model_root(date: Date, shared_volume_path: string) {
     const month = date.getMonth() + 1;
     return `${shared_volume_path}/${year}/${month}`;
 }
+
 function make_model_file_path(shared_root: string, filename: string) {
     return `${shared_root}/${sanitize(filename)}`;
 }
@@ -75,6 +76,17 @@ class ModelDataSource extends AuthDataSource {
         return this.model_upload_response(true, 'model upload was successful', model);
     }
 
+    async model_reducer(model) {
+        const model_detail_response = await this.get(`models/${model.uuid}`);
+        const full_model = model_detail_response.data.model;
+        return {
+            id: full_model.uuid,
+            name: full_model.name,
+            created: full_model.created,
+            path: full_model.path,
+        };
+    }
+
     model_upload_response(success: boolean, message: string, model: Model) {
         return {
             success: success,
@@ -83,7 +95,7 @@ class ModelDataSource extends AuthDataSource {
         };
     }
 
-    async store_model({stream, filename}: {stream: stream.Readable, filename: string}) {
+    async store_model({stream, filename}: { stream: stream.Readable, filename: string }) {
         const shared_models_root = make_model_root(new Date(), this.shared_volume_path);
         await validate_or_create_path(shared_models_root);
         const path = make_model_file_path(shared_models_root, filename);
