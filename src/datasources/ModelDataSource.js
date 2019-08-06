@@ -90,13 +90,11 @@ class ModelDataSource extends AuthDataSource {
         return new Promise((resolve, reject) => {
             stream
                 .on('error', async error => {
-                    console.log(error);
                     await fs.unlinkSync(path);
                     reject(error);
                 })
                 .pipe(fs.createWriteStream(path))
                 .on('error', error => {
-                    console.log(error);
                     reject(error);
                 })
                 .on('finish', () => {

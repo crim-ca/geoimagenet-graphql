@@ -78,6 +78,18 @@ class Jobs extends AuthDataSource {
         const res = await this.get(`processes/${process_id}/jobs`);
         const fetch_jobs_statuses = res.data.jobs.map(job => this.get(`processes/${process_id}/jobs/${job.uuid}`));
         const all_jobs = await Promise.all(fetch_jobs_statuses);
+        // if the job is failed, fetch the logs and replace the status_message of the relevant job
+        const failed_jobs_logs = all_jobs.filter(job => job.data.job.status === 'failed').map(job => this.get(`processes/${process_id}/jobs/${job.data.job.uuid}/logs`));
+        if (failed_jobs_logs.length > 0) {
+            const all_logs = await Promise.all(failed_jobs_logs);
+            all_logs.forEach(log => {
+                const log_job_uuid = log.meta.job_uuid;
+                const next_to_last_log = log.data.logs.slice(-2)[0];
+                const actual_message = next_to_last_log.match(/.+(Job <.+> .+)/)[1];
+                const corresponding_job = all_jobs.find(job => job.data.job.uuid === log_job_uuid);
+                corresponding_job.data.job.status_message = actual_message;
+            });
+        }
         return all_jobs.map(job_response => job_response.data.job);
     }
 
