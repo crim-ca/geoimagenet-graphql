@@ -30,8 +30,8 @@ pipeline {
             steps {
                 sh 'docker tag $LOCAL_IMAGE_NAME $LATEST_IMAGE_NAME'
                 sh 'docker push $LATEST_IMAGE_NAME'
-                sh 'ssh ubuntu@geoimagenetdev.crim.ca "cd ~/compose && ./geoimagenet-compose.sh pull frontend && ./geoimagenet-compose.sh up --force-recreate -d frontend"'
-                slackSend channel: '#geoimagenet-dev', color: 'good', message: "*GeoImageNet Frontend*:\nPushed docker image: `${env.LATEST_IMAGE_NAME}`\nDeployed to: https://geoimagenetdev.crim.ca"
+                sh 'ssh ubuntu@geoimagenetdev.crim.ca "cd ~/compose && ./geoimagenet-compose.sh pull graphql && ./geoimagenet-compose.sh up --force-recreate -d graphql"'
+                slackSend channel: '#geoimagenet-dev', color: 'good', message: "*GeoImageNet GraphQL*:\nPushed docker image: `${env.LATEST_IMAGE_NAME}`\nDeployed to: https://geoimagenetdev.crim.ca"
             }
         }
 
