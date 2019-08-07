@@ -1,10 +1,8 @@
 // @flow
 
-const {GIN_GraphQL} = require('./GIN_GraphQL');
-const fetchMock = require('fetch-mock');
 const {MODEL_TESTER_RESULT} = require('./test_data');
 const {ApolloServer, gql} = require('apollo-server');
-const {create_GIN_GraphQL_server, create_datasources} = require('./GIN_GraphQL');
+const {GIN_GraphQL, create_datasources} = require('./GIN_GraphQL');
 const {createTestClient} = require('apollo-server-testing');
 const {resolvers} = require('./resolvers');
 const {typeDefs} = require('./schema');

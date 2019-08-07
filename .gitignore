@@ -1,7 +1,8 @@
 node_modules
 dist
 .idea
-flow-typed
+flow-typed/npm
 coverage
 .graphqlconfig
 schema.graphql
+models_data

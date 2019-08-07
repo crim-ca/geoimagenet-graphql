@@ -37,7 +37,6 @@
     "apollo-link-http": "^1.5.5",
     "apollo-server-testing": "^2.2.0-alpha.2",
     "concurrently": "^4.1.0",
-    "fetch-mock": "^7.3.3",
     "flow-bin": "^0.98.1",
     "flow-typed": "^2.5.2",
     "graphql-tag": "^2.10.1",

@@ -6,3 +6,26 @@ export const SPECIFIC_BATCH_CREATION_JOB_RESPONSE_3 = {"meta": {"code": 200, "ty
 
 export const SPECIFIC_BATCH_CREATION_JOB_FAILURE_LOGS_1 = {"meta": {"code": 200, "type": "application/json", "detail": "Get process job result successful.", "route": "/processes/batch-creation/jobs/job_1/logs", "uri": "http://10.30.90.114/processes/batch-creation/jobs/job_1/logs", "method": "GET", "process_uuid": "batch-creation", "job_uuid": "job_1"}, "data": {"logs": ["[2019-08-02 14:56:54] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   0% running    Job <job_1> initializing configuration settings.", "[2019-08-02 14:56:54] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   1% running    Job <job_1> initiation done.", "[2019-08-02 14:56:54] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   2% running    Job <job_1> creating dataset container for patches.", "[2019-08-02 14:56:54] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   3% running    Job <job_1> obtaining references from process job inputs.", "[2019-08-02 14:56:54] ERROR    [geoimagenet_ml.store.datatypes.Job] 0:00:00   3% failed     Job <job_1> failed execution [builtins.ValueError: Missing input 'taxonomy_url' not matched from literal process input nor defaults.]..", "[2019-08-02 14:56:54] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   3% failed     Job <job_1> done."]}};
 export const SPECIFIC_BATCH_CREATION_JOB_FAILURE_LOGS_2 = {"meta": {"code": 200, "type": "application/json", "detail": "Get process job result successful.", "route": "/processes/batch-creation/jobs/job_2/logs", "uri": "http://10.30.90.114/processes/batch-creation/jobs/job_2/logs", "method": "GET", "process_uuid": "batch-creation", "job_uuid": "job_2"}, "data": {"logs": ["[2019-06-05 20:16:32] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   0% running    Job <job_2> initializing configuration settings.", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   1% running    Job <job_2> initiation done.", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   2% running    Job <job_2> creating dataset container for patches.", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   3% running    Job <job_2> obtaining references from process job inputs.", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   4% running    Job <job_2> fetching annotations using process job inputs.", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   5% running    Job <job_2> looking for latest batch.", "[2019-06-05 20:16:33] WARNING  [geoimagenet_ml.store.datatypes.Job] 0:00:00   5% running    Job <job_2> Could not find latest dataset with [None]. Building from scratch....", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   6% running    Job <job_2> starting batch patches creation.", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   7% running    Job <job_2> parsing raster files.", "[2019-06-05 20:16:33] ERROR    [geoimagenet_ml.store.datatypes.Job] 0:00:00   7% failed     Job <job_2> failed execution [builtins.AssertionError: invalid rasterfile paths specified: []]..", "[2019-06-05 20:16:33] INFO     [geoimagenet_ml.store.datatypes.Job] 0:00:00   7% failed     Job <job_2> done."]}};
+
+export const MODEL_UPLOAD_POST_RESPONSE = {
+    "meta": {
+        "code": 201,
+        "type": "application/json",
+        "detail": "Create model successful.",
+        "route": "/models",
+        "uri": "http://ml:3000/models",
+        "method": "POST"
+    },
+    "data": {
+        "model": {
+            "uuid": "model_response_id",
+            "created": "2019-08-06T20:57:07.806000+00:00",
+            "name": "test_model-best-url",
+            "user": 12,
+            "visibility": "private",
+            "path": "https://ogc-ems.crim.ca/wpsoutputs/ckpt.best.pth"
+        }
+    }
+};
+
+export const SPECIFIC_MODEL_RESPONSE = {"meta": {"code": 200, "type": "application/json", "detail": "Get model successful.", "route": "/models/model_response_id", "uri": "http://10.30.90.114/models/model_response_id", "method": "GET", "model_uuid": "model_response_id"}, "data": {"model": {"uuid": "model_response_id", "created": "2019-06-03T17:58:58.369000+00:00", "name": "my_model", "user": 1, "visibility": "private", "path": "/data/geoimagenet/models/2019/6/ckpt.0000.PTW-SCPL1-20190425-162746.pth"}, "owner": 1, "downloads": 0}};
