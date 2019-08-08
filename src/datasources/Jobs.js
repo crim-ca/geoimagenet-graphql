@@ -1,6 +1,6 @@
 // @flow
 const {AuthDataSource} = require('./AuthDataSource');
-const {JobLaunchResponse} = require('../schema');
+const {typeDefs: {JobLaunchResponse, Job}} = require('../schema');
 const {job_input_reducer, job_output_reducer} = require('./GeoImageNetAPI');
 const Sentry = require('@sentry/node');
 const {pubsub} = require('../utils');
@@ -69,7 +69,7 @@ class Jobs extends AuthDataSource {
         return res.data;
     }
 
-    async get_job(process_id: string, job_id: string) {
+    async get_job(process_id: string, job_id: string): Job {
         const res = await this.get(`processes/${process_id}/jobs/${job_id}`);
         return this.job_reducer(res.data.job);
     }
@@ -177,10 +177,20 @@ class Jobs extends AuthDataSource {
             };
         }
 
-        const {job_uuid} = result.data;
-        const job = await this.get_job('batch-creation', job_uuid);
+
+        let job;
+        try {
+            const {job_uuid} = result.data;
+            job = await this.get_job('batch-creation', job_uuid);
+        } catch (e) {
+            Sentry.captureException(e);
+            return {
+                success: false,
+                message: e.extensions.response.statusText,
+            };
+        }
         return {
-            success: result.meta.code === 200,
+            success: true,
             job: job,
         };
     }
@@ -211,7 +221,7 @@ class Jobs extends AuthDataSource {
         };
     }
 
-    job_reducer(job: any) {
+    job_reducer(job: any): Job {
         return {
             ...job,
             id: job.uuid,
