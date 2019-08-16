@@ -110,9 +110,8 @@ class Jobs extends AuthDataSource {
 
         // we first need all the public model-tester jobs ids
         const all_jobs = await this.fetch_all_jobs_from_ml_api(JOB_MODEL_TEST);
-        const public_jobs_ids = all_jobs
-            .filter(job => job.visibility === 'public')
-            .map(job => job.uuid);
+        const public_jobs = all_jobs.filter(job => job.visibility === 'public');
+        const public_jobs_ids = public_jobs.map(job => job.uuid);
 
         // we then get all those jobs information and extract the data portion
         const public_jobs_information_responses = await Promise.all(public_jobs_ids

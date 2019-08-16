@@ -33,3 +33,28 @@ Object {
   },
 }
 `;
+
+exports[`We create metrics from api response 1`] = `
+Object {
+  "data": Object {
+    "public_benchmarks": Array [
+      Object {
+        "owner": "1",
+        "result": Object {
+          "metrics": Object {
+            "top_1_accuracy": 0,
+            "top_5_accuracy": 100,
+          },
+        },
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;

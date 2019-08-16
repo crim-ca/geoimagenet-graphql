@@ -6,3 +6,6 @@ coverage
 .graphqlconfig
 schema.graphql
 models_data
+
+flow-typed/npm/*
+!flow-typed/graphql-tag/ol_vx.x.x.js

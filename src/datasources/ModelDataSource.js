@@ -6,6 +6,7 @@ const fs = require('fs');
 const sanitize = require('sanitize-filename');
 const {to_readable_date} = require('../utils');
 const {typeDefs: {Upload, ModelUploadResponse, Model}} = require('../schema');
+// TODO extract types from the schema with apollo-codegento make flow pass
 
 function make_model_root(date: Date, shared_volume_path: string) {
     const year = date.getFullYear();

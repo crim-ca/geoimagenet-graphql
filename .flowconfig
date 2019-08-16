@@ -1,4 +1,7 @@
 [ignore]
+.*/coverage/.*
+.*/models_data/.*
+.*/dist/.*
 .*/node_modules/.*
 
 [include]
@@ -7,4 +10,11 @@
 flow-typed
 
 [options]
-all=false
+
+[strict]
+nonstrict-import
+unclear-type
+unsafe-getters-setters
+untyped-import
+untyped-type-import
+sketchy-null
