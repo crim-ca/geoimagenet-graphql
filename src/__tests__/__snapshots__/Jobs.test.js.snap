@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Jobs have relevant error messages inaccordance to their status 1`] = `
+Object {
+  "data": Object {
+    "jobs": Array [
+      Object {
+        "id": "job_1",
+        "progress": 3,
+        "status": "failed",
+        "status_message": "Job <job_1> failed execution [builtins.ValueError: Missing input 'taxonomy_url' not matched from literal process input nor defaults.]..",
+      },
+      Object {
+        "id": "job_2",
+        "progress": 7,
+        "status": "failed",
+        "status_message": "Job <job_2> failed execution [builtins.AssertionError: invalid rasterfile paths specified: []]..",
+      },
+      Object {
+        "id": "job_3",
+        "progress": 7,
+        "status": "succeeded",
+        "status_message": "Job <job_3> done.",
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`We create metrics from api response 1`] = `
+Object {
+  "data": Object {
+    "public_benchmarks": Array [
+      Object {
+        "owner": "1",
+        "result": Object {
+          "metrics": Object {
+            "top_1_accuracy": 0,
+            "top_5_accuracy": 100,
+          },
+        },
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;

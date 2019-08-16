@@ -5,7 +5,6 @@ const resolvers = require('./resolvers');
 const fetch = require('node-fetch');
 
 const {MLAPI} = require('./datasources/machine_learning');
-const {GINAPI} = require('./datasources/geoimagenet_api');
 const {ModelDataSource} = require('./datasources/ModelDataSource');
 const {Jobs} = require('./datasources/Jobs');
 
@@ -36,7 +35,6 @@ function create_datasources(ml_endpoint: string,
                             model_storage_path: string) {
     return () => ({
         MLAPI: new MLAPI(ml_endpoint),
-        GINAPI: new GINAPI(geoimagenet_api_endpoint),
         model_data_source: new ModelDataSource(ml_endpoint, model_storage_path),
         jobs: new Jobs(ml_endpoint, geoimagenet_api_endpoint),
     })
@@ -91,3 +89,5 @@ module.exports = {
     GIN_GraphQL,
     create_datasources
 };
+
+

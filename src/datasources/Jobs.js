@@ -1,11 +1,16 @@
 // @flow
 const {AuthDataSource} = require('./AuthDataSource');
-const {JobLaunchResponse} = require('../schema');
-const {job_input_reducer, job_output_reducer} = require('./geoimagenet_api');
+const {typeDefs: {JobLaunchResponse, Job}} = require('../schema');
+const {job_input_reducer, job_output_reducer} = require('./GeoImageNetAPI');
 const Sentry = require('@sentry/node');
 const {pubsub} = require('../utils');
 
 const JOB_MODEL_TEST = 'model-tester';
+
+type JobFromMachineLearningAPI = {
+    user: Object,
+    outputs: Object,
+};
 
 function to_readable_date(string) {
     const date = new Date(string);
@@ -64,7 +69,7 @@ class Jobs extends AuthDataSource {
         return res.data;
     }
 
-    async get_job(process_id: string, job_id: string) {
+    async get_job(process_id: string, job_id: string): Job {
         const res = await this.get(`processes/${process_id}/jobs/${job_id}`);
         return this.job_reducer(res.data.job);
     }
@@ -73,6 +78,18 @@ class Jobs extends AuthDataSource {
         const res = await this.get(`processes/${process_id}/jobs`);
         const fetch_jobs_statuses = res.data.jobs.map(job => this.get(`processes/${process_id}/jobs/${job.uuid}`));
         const all_jobs = await Promise.all(fetch_jobs_statuses);
+        // if the job is failed, fetch the logs and replace the status_message of the relevant job
+        const failed_jobs_logs = all_jobs.filter(job => job.data.job.status === 'failed').map(job => this.get(`processes/${process_id}/jobs/${job.data.job.uuid}/logs`));
+        if (failed_jobs_logs.length > 0) {
+            const all_logs = await Promise.all(failed_jobs_logs);
+            all_logs.forEach(log => {
+                const log_job_uuid = log.meta.job_uuid;
+                const next_to_last_log = log.data.logs.slice(-2)[0];
+                const actual_message = next_to_last_log.match(/.+(Job <.+> .+)/)[1];
+                const corresponding_job = all_jobs.find(job => job.data.job.uuid === log_job_uuid);
+                corresponding_job.data.job.status_message = actual_message;
+            });
+        }
         return all_jobs.map(job_response => job_response.data.job);
     }
 
@@ -93,9 +110,8 @@ class Jobs extends AuthDataSource {
 
         // we first need all the public model-tester jobs ids
         const all_jobs = await this.fetch_all_jobs_from_ml_api(JOB_MODEL_TEST);
-        const public_jobs_ids = all_jobs
-            .filter(job => job.visibility === 'public')
-            .map(job => job.uuid);
+        const public_jobs = all_jobs.filter(job => job.visibility === 'public');
+        const public_jobs_ids = public_jobs.map(job => job.uuid);
 
         // we then get all those jobs information and extract the data portion
         const public_jobs_information_responses = await Promise.all(public_jobs_ids
@@ -114,7 +130,8 @@ class Jobs extends AuthDataSource {
         return jobs_information.map(job => this.benchmark_reducer(job));
     }
 
-    benchmark_reducer(job) {
+    benchmark_reducer(job: JobFromMachineLearningAPI) {
+
         const {user, outputs} = job;
         const summary = outputs.find(dict => dict.id === 'summary');
         const metrics = outputs.find(dict => dict.id === 'metrics');
@@ -159,10 +176,20 @@ class Jobs extends AuthDataSource {
             };
         }
 
-        const {job_uuid} = result.data;
-        const job = await this.get_job('batch-creation', job_uuid);
+
+        let job;
+        try {
+            const {job_uuid} = result.data;
+            job = await this.get_job('batch-creation', job_uuid);
+        } catch (e) {
+            Sentry.captureException(e);
+            return {
+                success: false,
+                message: e.extensions.response.statusText,
+            };
+        }
         return {
-            success: result.meta.code === 200,
+            success: true,
             job: job,
         };
     }
@@ -193,7 +220,7 @@ class Jobs extends AuthDataSource {
         };
     }
 
-    job_reducer(job: any) {
+    job_reducer(job: any): Job {
         return {
             ...job,
             id: job.uuid,
