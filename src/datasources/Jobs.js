@@ -162,6 +162,10 @@ class Jobs extends AuthDataSource {
                         id: 'geojson_urls',
                         value: `${this.geoimagenet_api_endpoint}/batches/annotations`,
                     },
+                    {
+                        id: 'taxonomy_url',
+                        value: `${this.geoimagenet_api_endpoint}/taxonomy_classes`,
+                    },
                 ]
             }), {
                 headers: {
