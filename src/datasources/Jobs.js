@@ -166,6 +166,18 @@ class Jobs extends AuthDataSource {
                         id: 'taxonomy_url',
                         value: `${this.geoimagenet_api_endpoint}/taxonomy_classes`,
                     },
+                    {
+                        id: "overwrite",
+                        value: true
+                    },
+                    {
+                        id: "crop_fixed_size",
+                        value: 64
+                    },
+                    {
+                        id: "crop_mode",
+                        value: 1
+                    }
                 ]
             }), {
                 headers: {
