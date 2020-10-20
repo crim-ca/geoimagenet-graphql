@@ -131,18 +131,20 @@ class Jobs extends AuthDataSource {
     }
 
     benchmark_reducer(job: JobFromMachineLearningAPI) {
-
+        
         const {user, outputs} = job;
         const summary = outputs.find(dict => dict.id === 'summary');
         const metrics = outputs.find(dict => dict.id === 'metrics');
+        // metrics compared to null to differentiate between 0 and null
         return {
             job: job,
             owner: user,
             result: {
                 summary: summary && summary.value ? summary.value : {},
-                metrics: metrics && metrics.value ? metrics.value : {
-                    top_1_accuracy: 0,
-                    top_5_accuracy: 0,
+                metrics: {
+                    top_1_accuracy: metrics && metrics.value.top_1_accuracy != null ? metrics.value.top_1_accuracy : 0,
+                    top_5_accuracy: metrics.value.top_5_accuracy != null ? metrics.value.top_5_accuracy : 0,
+                    mIoU: metrics && metrics.value.mIoU != null ? metrics.value.mIoU : 0.0,
                 },
                 samples: [],
                 classes: [],

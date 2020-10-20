@@ -215,6 +215,7 @@ const typeDefs = gql`
     type ModelTesterMetrics {
         top_1_accuracy: Int!
         top_5_accuracy: Int!
+        mIoU: Float!
     }
     
     type ModelTesterSample {
