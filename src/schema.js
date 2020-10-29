@@ -213,8 +213,8 @@ const typeDefs = gql`
     }
     
     type ModelTesterMetrics {
-        top_1_accuracy: Int!
-        top_5_accuracy: Int!
+        top_1_accuracy: Float!
+        top_5_accuracy: Float!
         mIoU: Float!
     }
     

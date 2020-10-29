@@ -142,8 +142,8 @@ class Jobs extends AuthDataSource {
             result: {
                 summary: summary && summary.value ? summary.value : {},
                 metrics: {
-                    top_1_accuracy: metrics && metrics.value.top_1_accuracy != null ? metrics.value.top_1_accuracy : 0,
-                    top_5_accuracy: metrics.value.top_5_accuracy != null ? metrics.value.top_5_accuracy : 0,
+                    top_1_accuracy: metrics && metrics.value.top_1_accuracy != null ? metrics.value.top_1_accuracy : 0.0,
+                    top_5_accuracy: metrics.value.top_5_accuracy != null ? metrics.value.top_5_accuracy : 0.0,
                     mIoU: metrics && metrics.value.mIoU != null ? metrics.value.mIoU : 0.0,
                 },
                 samples: [],
